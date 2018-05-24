@@ -1,0 +1,11 @@
+{
+  "generator-openapi-repo": {
+    "importExistingSpec": true,
+    "importedSpec": "../../Code/swagger-doc.yml",
+    "name": "NSW Crimes",
+    "repo": "ChrisWilcox78/NSWCrimeREST-ApiDoc",
+    "splitSpec": false,
+    "samples": true,
+    "installSwaggerUI": true
+  }
+}
