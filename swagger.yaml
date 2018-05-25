@@ -1,0 +1,318 @@
+swagger: '2.0'
+info:
+  title: NSW Crimes Data 1995-2012
+  description: 'A REST API that exposes the NSW Crimes dataset available at <https://search.data.gov.au/dataset/ds-dga-6cdf7a25-4f2d-4bae-b3b5-61175e2b3b13>.'
+  version: 0.1.0
+host: chriswilcox.pythonanywhere.com
+basePath: /
+produces:
+  - application/json
+paths:
+  /:
+    get:
+      summary: Returns a list of the REST resources available on the server.
+      tags:
+        - Other
+      responses:
+        '200':
+          description: A JSON array containing the resource name and its URL.
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the REST resource.
+                  example: crime_reports
+                url:
+                  type: string
+                  description: The URL via which the resource can be accessed.
+                  example: 'http://localhost:8000/crime-reports/'
+  /crime-reports/:
+    get:
+      summary: Returns a list of up to the first 500 CrimeReports.
+      tags:
+        - CrimeReport
+      parameters:
+        - name: locationId
+          in: query
+          description: Restricts the list of CrimeReports returned to those with the specified Location.
+          required: false
+          type: string
+        - name: offenceId
+          in: query
+          description: Restricts the list of CrimeReports returned to those with the specified Offence.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: A JSON array containing CrimeReports.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CrimeReport'
+  '/crime-reports/{id}':
+    get:
+      summary: Returns the CrimeReport with the specified id.
+      tags:
+        - CrimeReport
+      parameters:
+        - name: id
+          in: path
+          description: CrimeReport ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A CrimeReport.
+          schema:
+            $ref: '#/definitions/CrimeReport'
+        '400':
+          description: The request was malformed.
+        '404':
+          description: The specified CrimeReport cannot be found.
+  /crime-locations/:
+    get:
+      summary: Returns a list of up to the first 500 CrimeLocations.
+      tags:
+        - CrimeLocation
+      responses:
+        '200':
+          description: A JSON array containing CrimeLocations.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CrimeLocation'
+  '/crime-locations/{id}':
+    get:
+      summary: Returns the CrimeLocation with the specified id.
+      tags:
+        - CrimeLocation
+      parameters:
+        - name: id
+          in: path
+          description: CrimeLocation ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A Crime Location.
+          schema:
+            $ref: '#/definitions/CrimeLocation'
+        '400':
+          description: The request was malformed.
+        '404':
+          description: The specified CrimeLocation cannot be found.
+  '/crime-locations/{id}/crime-reports':
+    get:
+      summary: 'Returns the first 500 CrimeReports related to the specified CrimeLocation.  This is the equivalent of /crime-reports?locationId={id}'
+      tags:
+        - CrimeLocation
+      parameters:
+        - name: id
+          in: path
+          description: CrimeLocation ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of CrimeReports.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CrimeReport'
+  /offences/:
+    get:
+      summary: Returns a list of up to the first 500 offences.
+      tags:
+        - Offence
+      responses:
+        '200':
+          description: A JSON array containing Offences.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Offence'
+  '/offences/{id}':
+    get:
+      summary: Returns the offence with the specified id.
+      tags:
+        - Offence
+      parameters:
+        - name: id
+          in: path
+          description: Offence ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An Offence.
+          schema:
+            $ref: '#/definitions/Offence'
+        '400':
+          description: The request was malformed.
+        '404':
+          description: The specified Offence cannot be found.
+  '/offences/{id}/crime-reports':
+    get:
+      summary: 'Returns the first 500 CrimeReports related to the specified Offence.  This is the equivalent of /crime-reports?offenceId={id}'
+      tags:
+        - Offence
+      parameters:
+        - name: id
+          in: path
+          description: Offence ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of CrimeReports.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CrimeReport'
+  /import/:
+    post:
+      summary: Starts an import with the specified file.
+      consumes:
+        - application/json
+      tags:
+        - Other
+      parameters:
+        - in: body
+          name: filename
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The import process has successfully been created.
+        '400':
+          description: The request was malformed.
+definitions:
+  CrimeLocation:
+    description: The location at which a crime occurred.
+    type: object
+    properties:
+      id:
+        type: string
+        description: A UUID identifying the crime location.
+        example: 5b03b6d5e3ddbe03ed86a220
+      stats_area:
+        type: string
+        description: The statistical area related to the location.
+        example: Inner Sydney
+      lga:
+        type: string
+        description: The local government area related to the location.
+        example: Botany Bay
+      links:
+        type: array
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - self
+                - crime_reports
+              description: The type of resource provided by the link.
+              example: crime_reports
+            url:
+              type: string
+              description: The URL for the link.
+              example: 'http://localhost:8000/crime-locations/5b03b6d5e3ddbe03ed86a220/crime-reports/'
+  Offence:
+    type: object
+    properties:
+      id:
+        type: string
+        description: A UUID identifying the offence.
+        example: 5b03b6d4e3ddbe03ed86a21f
+      category:
+        type: string
+        description: The category of the offence.
+        example: Homicide
+      subcategory:
+        type: string
+        description: The subcategory of the offence.
+        example: Murder
+      links:
+        type: array
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - self
+                - crime_reports
+              description: The type of resource provided by the link.
+              example: self
+            url:
+              type: string
+              description: The URL for the link.
+              example: 'http://localhost:8000/offences/5b03b6d4e3ddbe03ed86a21f'
+  CrimeReport:
+    type: object
+    properties:
+      id:
+        type: string
+        description: A UUID identifying the crime report.
+        example: 5b03b6d5e3ddbe03ed86a221
+      time_period:
+        type: string
+        description: The time period covered by the report in Mmm YYYY format.
+        example: Jan 1995
+      crime_count:
+        type: number
+        description: A count of the crimes for the indicated period.
+        example: 23
+      location:
+        type: object
+        description: A summary of the location for the report.
+        properties:
+          id:
+            type: string
+            description: A UUID identifying the crime location.
+            example: 5b03b6d5e3ddbe03ed86a220
+          summary:
+            type: string
+            description: A human-readable summary representation of the location.
+            example: Botany Bay
+          url:
+            type: string
+            description: The URL via which to get more detailed location information.
+            example: 'http://localhost:8000/crime-locations/5b03b6d5e3ddbe03ed86a220'
+      offence:
+        type: object
+        description: A summary of the offence for the report.
+        properties:
+          id:
+            type: string
+            description: A UUID identifying the offence.
+            example: 5b03b6d4e3ddbe03ed86a21f
+          summary:
+            type: string
+            description: A human-readable summary representation of the offence.
+            example: Homicide
+          url:
+            type: string
+            description: The URL via which to get more detailed offence information.
+            example: 'http://localhost:8000/offences/5b03b6d4e3ddbe03ed86a21f'
+      links:
+        type: array
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - self
+              description: The type of resource provided by the link.
+              example: self
+            url:
+              type: string
+              description: The URL for the link.
+              example: 'http://localhost:8000/crime-reports/5b03b6d5e3ddbe03ed86a221'
