@@ -4,7 +4,7 @@ info:
   description: A REST API that exposes the NSW Crimes dataset available at <https://search.data.gov.au/dataset/ds-dga-6cdf7a25-4f2d-4bae-b3b5-61175e2b3b13>.
   version: 0.1.0
 
-host: localhost:8000
+host: http://chriswilcox.pythonanywhere.com
 basePath: /
 
 produces: 
